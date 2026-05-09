@@ -1,6 +1,7 @@
 #include "CP.h"
 #include "TestScurt.h"
 #include <assert.h>
+#include <iostream>
 
 bool rel(TPrioritate p1, TPrioritate p2) {
 	if (p1 <= p2) {
@@ -12,6 +13,22 @@ bool rel(TPrioritate p1, TPrioritate p2) {
 }
 
 
+void tiparesteCoadaCuPrioritati(CP& cp)
+{
+	CP copie_coada_cu_prioritati(rel);
+	while (!cp.vida())
+	{
+		Element e = cp.sterge();
+		std::cout<<e.first<<std::endl;
+		copie_coada_cu_prioritati.adauga(e.first,e.second);
+	}
+	while (!copie_coada_cu_prioritati.vida())
+	{
+		Element e = copie_coada_cu_prioritati.sterge();
+		cp.adauga(e.first,e.second);
+	}
+
+}
 
 
 void testAll() { //apelam fiecare functie sa vedem daca exista
@@ -46,5 +63,28 @@ void testAll() { //apelam fiecare functie sa vedem daca exista
 	assert(c.element().second == 12);
 	assert(c.sterge().second == 12);
 	assert(c.vida() == true);
+
+	test_tiparire();
 }
 
+void test_tiparire()
+{
+	CP c(rel);
+	c.adauga(5, 5);
+	assert(c.element().first == 5);
+	assert(c.element().second == 5);
+	c.adauga(3, 3);
+	assert(c.element().first == 3);
+	assert(c.element().second == 3);
+	c.adauga(10, 10);
+
+	tiparesteCoadaCuPrioritati(c);
+	assert(c.vida() == false);
+	assert(c.element().first == 3);
+	assert(c.element().second == 3);
+	c.sterge();
+	assert(c.element().first == 5);
+	c.sterge();
+	assert(c.element().first == 10);
+	c.sterge();
+}

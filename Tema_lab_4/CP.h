@@ -11,12 +11,28 @@ typedef std::pair<TElem, TPrioritate> Element;
 
 typedef bool (*Relatie)(TPrioritate p1, TPrioritate p2);
 
+class Nod {
+	Element e;//Valoarea elementului curent
+	Nod* urm;//Pointer catre urmatorul element din lista
+
+public:
+	friend class CP;
+	Nod() = default;
+
+	Nod(Element e, Nod* urm) : e{ e }, urm{ urm } {};//constructor
+	
+	Element element_curent();
+	Nod* urmator();
+	void schimba_urm(Nod* urmator);
+
+};
+
 class CP {
 private:
 
-	Element* e;//Valoarea elementului curent
-	CP* urmator;//adresa catre elementul urmator
-	Relatie relatie;//relatia de ordine
+	
+	Relatie relatie;//Relatia de ordine
+	Nod* prim;
 
 public:
 	//constructorul implicit

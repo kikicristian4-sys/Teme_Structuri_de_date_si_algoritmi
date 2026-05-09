@@ -7,138 +7,109 @@
 
 using namespace std;
 
-
-CP::CP(Relatie r) {
-	this -> relatie = r;
-	this -> urmator = nullptr;
-	this -> e = nullptr;
+//teta (1)
+Element Nod::element_curent() {
+	return e;
 }
 
+//teta (1)
+Nod* Nod::urmator() {
+	return urm;
 
+}
+
+//teta (1)
+void Nod::schimba_urm(Nod* urmator)
+{
+	this->urm = urmator;
+}
+
+//teta (1)
+CP::CP(Relatie r) {
+	this -> relatie = r;
+}
+
+/*
+Caz favorabil: elementul pe care il adaugam este cel mai prioritar -> teta(1)
+Caz defavorabil: elementul pe care il adaugam este cel mai putin prioritar -> teta(n)
+Caz mediu: teta(n)
+Complexitate generala: O(n)
+*/
 void CP::adauga(TElem e, TPrioritate p) {
-	if (this -> e == nullptr)
-		this -> e = new Element (e,p);
+	if (vida())
+	{
+		Element elem(e,p);
+		Nod* prim = new Nod(elem,nullptr);
+		this->prim = prim;
+	}
 	else
 	{
-		if (this->urmator == nullptr)
+		Element elem(e,p);
+		Nod* nod = new Nod(elem,nullptr);
+		Nod* cautare = prim;
+		if (! relatie(prim->element_curent().second, nod->element_curent().second))
 		{
-			CP* nod_nou = new CP(this -> relatie);
-			nod_nou -> e = new Element(e, p);
-			nod_nou -> urmator = nullptr;
-
-			if (this -> relatie(this->e->second, nod_nou->e->second))
-			{
-				this -> urmator = nod_nou;
-			}
-			else
-			{
-				swap(this -> e, nod_nou -> e);
-				this -> urmator = nod_nou;
-				
-			}
-		}
-		else
-		{
-			CP* nod_nou =  new CP(this -> relatie);
-			nod_nou->e = new Element(e, p);
-
-			if (!this->relatie(this->e->second, nod_nou->e->second))
-			{
-				swap(this->e, nod_nou->e);
-				nod_nou -> urmator = this -> urmator;
-				this->urmator = nod_nou;
-			}
-			else
-			{
-				CP* parcurgere = this;
-				while (parcurgere -> urmator != nullptr)
-				{
-					if (this->relatie(parcurgere->urmator->e->second, nod_nou->e->second))
-					{
-						parcurgere = parcurgere ->urmator;
-					}
-					else
-					{
-						nod_nou -> urmator = parcurgere -> urmator;
-						parcurgere -> urmator = nod_nou;
-						break;
-					}
-				}
-				if (parcurgere->urmator == nullptr)
-				{
-					parcurgere -> urmator = nod_nou;
-					nod_nou -> urmator = nullptr;
-				}
-			}	
+			nod->schimba_urm(prim);
+			prim = nod;
+			return;
 		}
 		
+		while (cautare->urmator() != nullptr)
+		{
+			if (! relatie((cautare->urmator())->element_curent().second, nod->element_curent().second))				
+			{
+				nod->schimba_urm(cautare->urmator());
+				cautare->schimba_urm(nod);
+				return;
+			}
+			cautare = cautare->urmator();
+		}
+		cautare->schimba_urm(nod);
 	}
 }
 
 //arunca exceptie daca coada e vida
+//teta (1)
 Element CP::element() const {
-	if(this -> e == nullptr)
+	if(vida())
 		throw std::length_error("Lista este vida!");
 
-	return pair <TElem, TPrioritate>  (this ->e -> first, this -> e -> second);       // copy constructor
+	return pair <TElem, TPrioritate>  (this ->prim->element_curent().first, this ->prim->element_curent().second);
 ;
 }
 
+//teta (1)
 Element CP::sterge() {
-	if (this->e == nullptr)
+	if (vida())
 		throw std::length_error("Lista este vida!");
 
-	if (this->urmator != nullptr)
-	{
-		CP* nod_de_sters = this->urmator;
+	auto elem = prim->element_curent().first;
+	auto priority = prim -> element_curent().second;
 
-		swap(this->e, this->urmator->e);
-		this->urmator = this->urmator->urmator;
+	Nod* nod_de_sters = prim;
+	prim = prim->urmator();
 
-		TElem valoare = nod_de_sters->e->first;
-		TPrioritate prioritate = nod_de_sters->e->second;
-
-
-		nod_de_sters -> urmator = nullptr;
-		delete nod_de_sters;
-
-		return pair <TElem, TPrioritate>(valoare, prioritate);
-	}
-	else
-	{
-		TElem valoare = this ->e->first;
-		TPrioritate prioritate =this ->e->second;
-
-		delete this -> e;
-		this -> e = nullptr;
-
-		return pair <TElem, TPrioritate>(valoare, prioritate);
-	}
+	delete nod_de_sters;
+	
+	return pair <TElem, TPrioritate> (elem, priority);
 	
 }
 
+//teta (1)
 bool CP::vida() const {
-	if(this -> e == nullptr)
+	if(this->prim == nullptr)
 		return true;
 	return false;
 }
 
-
+//teta (n)
 CP::~CP() {
-	delete this -> e;
-
-	CP* parcurgere = this -> urmator;
-	while (parcurgere != nullptr)
-	{
-		CP* nod_urmator_curent = parcurgere;
-		
-		parcurgere = parcurgere -> urmator;
-
-		nod_urmator_curent -> urmator = nullptr;		
-		delete nod_urmator_curent;
-		
-		
-	}
-	
+	if(! vida())
+		while (prim->urmator() != nullptr)
+			{
+				Nod* nod_de_sters = prim;
+				prim = prim->urmator();
+				delete nod_de_sters;
+			}
 };
 
